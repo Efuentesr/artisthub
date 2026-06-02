@@ -1,0 +1,30 @@
+backend/
+├── apps/
+│   ├── users/          ← login/registro con email, JWT, verificación
+│   └── interactions/   ← Artist, SocialAccount, Interaction, Note
+├── config/
+│   ├── settings.py
+│   └── urls.py
+└── requirements.txt
+
+# 1. Descomprimir
+tar -xzf artisthub-backend.tar.gz
+cd backend
+
+# 2. Entorno virtual
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar .env
+cp .env.example .env
+# Editar .env con tu DATABASE_URL de PostgreSQL
+
+# 5. Migraciones y correr
+python manage.py makemigrations users interactions
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver

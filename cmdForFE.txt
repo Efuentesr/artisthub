@@ -1,0 +1,24 @@
+# Descomprimir y entrar
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Crear .env
+cp .env.example .env
+
+# Correr
+npm run dev
+
+
+
+- Home — stats de pendientes y total, cuentas conectadas, recientes
+- Interacciones — lista con búsqueda, filtros por plataforma y etiqueta, botón + para agregar
+- NoteDrawer — bottom sheet para etiquetar y anotar con un toque
+- AddInteractionDrawer — formulario completo para captura manual
+- Cuentas — agregar y eliminar cuentas de Instagram, TikTok, Facebook
+- Perfil — editar datos y cerrar sesión
+- Navegación inferior — móvil-first, siempre visible
+
+ngrok auth token
+3EYKWlNujtxgNjPdkUCFvXOW7pe_6EJdApaSTh3SzoJY1E6dp
