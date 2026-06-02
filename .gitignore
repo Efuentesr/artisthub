@@ -8,7 +8,7 @@ __pycache__/
 *.pyo
 *.pyd
 *.egg-info/
-dist/
+#dist/
 build/
 
 # Django
@@ -20,7 +20,7 @@ staticfiles/
 
 # Node / Frontend
 node_modules/
-dist/
+#dist/
 .env.local
 .env.production
 
