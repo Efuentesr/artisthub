@@ -37,6 +37,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # justo después de security
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -51,7 +52,10 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates", BASE_DIR.parent / "frontend" / "dist"],
+        "DIRS": [
+            BASE_DIR / "templates",
+            BASE_DIR.parent / "frontend" / "dist",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -82,19 +86,21 @@ TIME_ZONE = "America/Lima"
 USE_I18N = True
 USE_TZ = True
 
+# ─── Static files ────────────────────────────────────────────────────────────
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# ─── Frontend (React build) ─────────────────────────────────────────────────
+# Frontend build
 FRONTEND_DIR = BASE_DIR.parent / "frontend" / "dist"
 STATICFILES_DIRS = [FRONTEND_DIR / "assets"] if (FRONTEND_DIR / "assets").exists() else []
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ─── Auth ───────────────────────────────────────────────────────────────────
+# ─── Auth ────────────────────────────────────────────────────────────────────
 AUTH_USER_MODEL = "users.User"
 
-# ─── REST Framework ─────────────────────────────────────────────────────────
+# ─── REST Framework ──────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -105,7 +111,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# ─── JWT ────────────────────────────────────────────────────────────────────
+# ─── JWT ─────────────────────────────────────────────────────────────────────
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -114,7 +120,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# ─── Spectacular (Swagger) ───────────────────────────────────────────────────
+# ─── Spectacular (Swagger) ────────────────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
     "TITLE": "ArtistHub API",
     "DESCRIPTION": "API para gestión de interacciones de redes sociales de artistas.",
@@ -123,13 +129,13 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
 }
 
-# ─── CORS ────────────────────────────────────────────────────────────────────
+# ─── CORS ─────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=["http://localhost:5173", "http://127.0.0.1:5173"],
 )
 
-# ─── Email ───────────────────────────────────────────────────────────────────
+# ─── Email ────────────────────────────────────────────────────────────────────
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
     default="django.core.mail.backends.console.EmailBackend",
