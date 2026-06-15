@@ -12,8 +12,9 @@ import AccountsPage from "./pages/dashboard/AccountsPage";
 import ProfilePage from "./pages/dashboard/ProfilePage";
 import ShareTargetPage from "./pages/ShareTargetPage";
 import BottomNav from "./components/ui/BottomNav";
+import PrivacyPage from "./pages/PrivacyPage";
 
-const NO_NAV_ROUTES = ["/login", "/register", "/resend-verification", "/share-target"];
+const NO_NAV_ROUTES = ["/login", "/register", "/resend-verification", "/share-target", "/privacy"];
 
 function AppLayout({ children }) {
   const location = useLocation();
@@ -51,6 +52,7 @@ function AppRoutes() {
       <Route path="/interactions"  element={<ProtectedRoute><InteractionsPage /></ProtectedRoute>} />
       <Route path="/accounts"      element={<ProtectedRoute><AccountsPage /></ProtectedRoute>} />
       <Route path="/profile"       element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/privacy" element={<PrivacyPage />} />
     </Routes>
   );
 }
