@@ -11,6 +11,7 @@ from .serializers import (
     InteractionCreateSerializer,
     NoteSerializer,
 )
+from .services import sync_instagram_dms
 
 
 # ─── Social Accounts ────────────────────────────────────────────────────────
@@ -180,3 +181,33 @@ class NoteUpsertView(APIView):
             NoteSerializer(note).data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
+
+
+@extend_schema(
+    tags=["Interacciones"],
+    summary="Sincronizar DMs de Instagram",
+    description="Consulta la API de Instagram y guarda los DMs como interacciones.",
+    responses={200: OpenApiResponse(description="Resumen de sincronización.")},
+)
+class InstagramSyncView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            social_account = SocialAccount.objects.get(
+                artist=request.user,
+                platform=SocialAccount.Platform.INSTAGRAM,
+                is_active=True,
+            )
+        except SocialAccount.DoesNotExist:
+            return Response(
+                {"detail": "No tienes una cuenta de Instagram conectada."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        result = sync_instagram_dms(social_account)
+
+        if "error" in result:
+            return Response({"detail": result["error"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(result, status=status.HTTP_200_OK)

@@ -17,6 +17,13 @@ class SocialAccount(models.Model):
     )
     platform = models.CharField(max_length=20, choices=Platform.choices)
     handle = models.CharField(max_length=120, help_text="@nombre en esa red social")
+
+    ig_user_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Instagram Business Account ID (para API Graph)"
+    )
+
     access_token = models.TextField(blank=True, help_text="Token OAuth (se llenará en Fase 2)")
     token_expires = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
