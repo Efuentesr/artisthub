@@ -20,6 +20,22 @@ export default function AccountsPage() {
 
   useEffect(() => { fetchSocialAccounts(); }, []);
 
+  const [syncing, setSyncing] = useState(null);
+  const [syncResult, setSyncResult] = useState(null);
+
+  const handleSync = async (id) => {
+    setSyncing(id);
+    setSyncResult(null);
+    try {
+      const res = await interactionsApi.syncInstagram();
+      setSyncResult({ accountId: id, ...res.data });
+    } catch (e) {
+      setSyncResult({ accountId: id, error: "Error al sincronizar" });
+    }
+    setSyncing(null);
+  };
+
+
   const handleAdd = async () => {
     if (!form.handle.trim()) { setError("El handle es obligatorio"); return; }
     setIsSaving(true);
@@ -57,7 +73,7 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 space-y-3">
+      {/* <div className="px-4 pt-4 space-y-3">
         {socialAccounts.length === 0 && (
           <div className="text-center py-16">
             <p className="text-white/30 text-sm">Aún no tienes cuentas registradas.</p>
@@ -82,7 +98,46 @@ export default function AccountsPage() {
             </button>
           </div>
         ))}
-      </div>
+      </div> */}
+
+      {socialAccounts.map((acc) => (
+        <div key={acc.id} className="bg-surface-1 border border-white/8 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className={`inline-flex items-center rounded-full border text-xs px-2.5 py-1 font-medium mb-1 ${platformColor[acc.platform]}`}>
+                {acc.platform_display}
+              </span>
+              <p className="text-white font-medium text-sm">{acc.handle}</p>
+            </div>
+            <button
+              onClick={() => handleDelete(acc.id)}
+              className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 active:scale-95 transition-transform"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {acc.platform === "instagram" && (
+            <button
+              onClick={() => handleSync(acc.id)}
+              disabled={syncing === acc.id}
+              className="mt-3 w-full py-2 rounded-xl text-xs border border-brand-500/30 bg-brand-500/10 text-brand-300 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {syncing === acc.id ? "Sincronizando..." : "⟳ Sincronizar DMs"}
+            </button>
+          )}
+
+          {syncResult && syncResult.accountId === acc.id && (
+            <p className="text-xs text-white/40 mt-2 text-center">
+              {syncResult.created} nuevos · {syncResult.skipped} ya existían
+            </p>
+          )}
+        </div>
+      ))}
+
+
 
       {/* Add drawer */}
       {showAdd && (
