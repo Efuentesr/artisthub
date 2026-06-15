@@ -8,9 +8,13 @@ class SocialAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SocialAccount
-        fields = ["id", "platform", "platform_display", "handle", "is_active", "created_at"]
+        fields = ["id", "platform", "platform_display", "handle", "access_token", "ig_user_id", "is_active", "created_at"]
+        # fields = ["id", "platform", "platform_display", "handle", "is_active", "created_at"]
         read_only_fields = ["id", "created_at"]
-
+        extra_kwargs = {
+            "access_token": {"write_only": True},
+        }
+        
     @extend_schema_field(serializers.CharField())
     def get_platform_display(self, obj):
         return obj.get_platform_display()
