@@ -8,6 +8,7 @@ from .views import (
     InstagramSyncView,
     InstagramOAuthInitView,
     InstagramOAuthCallbackView,
+    DebugEnvView,
 )
 
 urlpatterns = [
@@ -26,4 +27,7 @@ urlpatterns = [
     path("instagram/sync/", InstagramSyncView.as_view(), name="instagram-sync"),
     path("instagram/oauth/", InstagramOAuthInitView.as_view(), name="instagram-oauth-init"),
     path("instagram/callback/", InstagramOAuthCallbackView.as_view(), name="instagram-callback"),
+
+    #temporal
+    path("debug/env/", DebugEnvView.as_view(), name="debug-env"),
 ]

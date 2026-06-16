@@ -293,3 +293,13 @@ class InstagramOAuthCallbackView(APIView):
         )
 
         return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")
+    
+class DebugEnvView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        from django.conf import settings
+        return Response({
+            "META_APP_ID": settings.META_APP_ID,
+            "INSTAGRAM_APP_ID": settings.INSTAGRAM_APP_ID,
+        })
