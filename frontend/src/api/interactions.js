@@ -12,8 +12,10 @@ export const interactionsApi = {
   updateInteraction: (id, data) => api.patch(`/interactions/${id}/`, data),
   deleteInteraction: (id) => api.delete(`/interactions/${id}/`),
   syncInstagram: () => api.post("/instagram/sync/"),
-  
+
   // Notas
   upsertNote: (interactionId, data) =>
     api.post(`/interactions/${interactionId}/note/`, data),
+
+  getInstagramAuthUrl: () => api.get("/instagram/oauth/"),
 };

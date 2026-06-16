@@ -23,6 +23,15 @@ export default function AccountsPage() {
   const [syncing, setSyncing] = useState(null);
   const [syncResult, setSyncResult] = useState(null);
 
+  const handleConnect = async () => {
+    try {
+      const res = await interactionsApi.getInstagramAuthUrl();
+      window.location.href = res.data.auth_url;
+    } catch (e) {
+      setError("Error al iniciar conexión con Instagram");
+    }
+  };
+
   const handleSync = async (id) => {
     setSyncing(id);
     setSyncResult(null);
@@ -73,13 +82,20 @@ export default function AccountsPage() {
         </div>
       </div>
 
+      {socialAccounts.length === 0 && (
+        <div className="text-center py-16 space-y-4">
+          <p className="text-white/30 text-sm">Aún no tienes cuentas registradas.</p>
+          <button
+            onClick={handleConnect}
+            className="mx-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm active:scale-95 transition-all"
+          >
+            <span>📷</span> Conectar Instagram
+          </button>
+        </div>
+      )}
+
       {/* <div className="px-4 pt-4 space-y-3">
-        {socialAccounts.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-white/30 text-sm">Aún no tienes cuentas registradas.</p>
-            <p className="text-white/20 text-xs mt-1">Toca el + para agregar una.</p>
-          </div>
-        )}
+
         {socialAccounts.map((acc) => (
           <div key={acc.id} className="bg-surface-1 border border-white/8 rounded-2xl p-4 flex items-center justify-between">
             <div>
