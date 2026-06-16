@@ -12,7 +12,8 @@ REDIRECT_URI = "https://artisthub-production-33bd.up.railway.app/api/instagram/c
 def get_instagram_auth_url(state: str) -> str:
     """Genera la URL de autorización de Instagram."""
     params = {
-        "client_id": settings.INSTAGRAM_APP_ID,
+        #"client_id": settings.INSTAGRAM_APP_ID,
+        "client_id": settings.META_APP_ID, 
         "redirect_uri": REDIRECT_URI,
         #"scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",
         "scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",

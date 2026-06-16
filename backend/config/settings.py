@@ -151,3 +151,6 @@ FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 
 INSTAGRAM_APP_ID = env("INSTAGRAM_APP_ID", default="")
 INSTAGRAM_APP_SECRET = env("INSTAGRAM_APP_SECRET", default="")
+
+META_APP_ID = env("META_APP_ID", default="")
+META_APP_SECRET = env("META_APP_SECRET", default="")
