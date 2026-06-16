@@ -13,6 +13,11 @@ from .serializers import (
 )
 from .services import sync_instagram_dms
 
+####
+from .oauth import get_instagram_auth_url, exchange_code_for_token, get_long_lived_token
+import secrets
+from django.shortcuts import redirect as django_redirect
+####
 
 # ─── Social Accounts ────────────────────────────────────────────────────────
 
@@ -211,3 +216,80 @@ class InstagramSyncView(APIView):
             return Response({"detail": result["error"]}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(result, status=status.HTTP_200_OK)
+    
+
+################## EFRM ###################
+
+class InstagramOAuthInitView(APIView):
+    """Genera la URL de autorización y redirige al usuario a Instagram."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        state = secrets.token_urlsafe(32)
+        # Guardamos el state y el user_id en la sesión para verificarlo en el callback
+        request.session["ig_oauth_state"] = state
+        request.session["ig_oauth_user_id"] = request.user.id
+        auth_url = get_instagram_auth_url(state)
+        return Response({"auth_url": auth_url})
+
+
+class InstagramOAuthCallbackView(APIView):
+    """Recibe el código de Meta, lo intercambia por token y lo guarda."""
+    permission_classes = []  # Público — Meta redirige aquí sin JWT
+
+    def get(self, request):
+        code = request.GET.get("code")
+        state = request.GET.get("state")
+        error = request.GET.get("error")
+
+        FRONTEND_URL = "https://artisthub-fe-production-7a98.up.railway.app"
+
+        if error or not code:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+
+        # 1. Intercambiar código por token corto
+        token_data = exchange_code_for_token(code)
+        if "error" in token_data:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+
+        short_token = token_data.get("access_token")
+        ig_user_id = str(token_data.get("user_id", ""))
+
+        # 2. Intercambiar por token de larga duración
+        long_data = get_long_lived_token(short_token)
+        if "error" in long_data:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+
+        long_token = long_data.get("access_token")
+        expires_in = long_data.get("expires_in", 5184000)  # ~60 días
+
+        from datetime import datetime, timezone, timedelta
+        token_expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+
+        # 3. Buscar el user_id guardado en sesión
+        user_id = request.session.get("ig_oauth_user_id")
+        saved_state = request.session.get("ig_oauth_state")
+
+        if not user_id or saved_state != state:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+
+        # 4. Actualizar o crear el SocialAccount
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+
+        SocialAccount.objects.update_or_create(
+            artist=user,
+            platform=SocialAccount.Platform.INSTAGRAM,
+            defaults={
+                "access_token": long_token,
+                "ig_user_id": ig_user_id,
+                "token_expires": token_expires,
+                "is_active": True,
+            }
+        )
+
+        return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")

@@ -6,6 +6,8 @@ from .views import (
     InteractionDetailView,
     NoteUpsertView,
     InstagramSyncView,
+    InstagramOAuthInitView,
+    InstagramOAuthCallbackView,
 )
 
 urlpatterns = [
@@ -20,6 +22,8 @@ urlpatterns = [
     # Notas
     path("interactions/<int:interaction_id>/note/", NoteUpsertView.as_view(), name="interaction-note"),
 
-    # Sync Instagram
+    # Instagram
     path("instagram/sync/", InstagramSyncView.as_view(), name="instagram-sync"),
+    path("instagram/oauth/", InstagramOAuthInitView.as_view(), name="instagram-oauth-init"),
+    path("instagram/callback/", InstagramOAuthCallbackView.as_view(), name="instagram-callback"),
 ]

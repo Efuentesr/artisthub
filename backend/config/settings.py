@@ -148,3 +148,6 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="ArtistHub <no-reply@artisthub.com>")
 
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+
+INSTAGRAM_APP_ID = env("INSTAGRAM_APP_ID", default="")
+INSTAGRAM_APP_SECRET = env("INSTAGRAM_APP_SECRET", default="")
