@@ -298,8 +298,10 @@ class DebugEnvView(APIView):
     permission_classes = []
 
     def get(self, request):
+        import os
         from django.conf import settings
         return Response({
-            "META_APP_ID": settings.META_APP_ID,
-            "INSTAGRAM_APP_ID": settings.INSTAGRAM_APP_ID,
+            "META_APP_ID_settings": settings.META_APP_ID,
+            "META_APP_ID_os": os.environ.get("META_APP_ID", "NOT FOUND"),
+            "INSTAGRAM_APP_ID_os": os.environ.get("INSTAGRAM_APP_ID", "NOT FOUND"),
         })
