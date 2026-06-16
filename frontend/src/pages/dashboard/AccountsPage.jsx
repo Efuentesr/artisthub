@@ -133,6 +133,12 @@ export default function AccountsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+            <button
+              onClick={handleConnect}
+              className="mt-2 w-full py-2 rounded-xl text-xs border border-rose-500/20 bg-rose-500/5 text-rose-400 active:scale-95 transition-all"
+            >
+              🔄 Reconectar Instagram
+            </button>
           </div>
 
           {acc.platform === "instagram" && (
@@ -143,6 +149,9 @@ export default function AccountsPage() {
             >
               {syncing === acc.id ? "Sincronizando..." : "⟳ Sincronizar DMs"}
             </button>
+
+
+
           )}
 
           {syncResult && syncResult.accountId === acc.id && (
