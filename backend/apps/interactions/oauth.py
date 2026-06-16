@@ -1,7 +1,8 @@
 import requests
 from django.conf import settings
 
-INSTAGRAM_AUTH_URL = "https://api.instagram.com/oauth/authorize"
+#INSTAGRAM_AUTH_URL = "https://api.instagram.com/oauth/authorize"
+INSTAGRAM_AUTH_URL = "https://www.facebook.com/dialog/oauth"
 INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token"
 INSTAGRAM_LONG_TOKEN_URL = "https://graph.instagram.com/access_token"
 
@@ -13,9 +14,11 @@ def get_instagram_auth_url(state: str) -> str:
     params = {
         "client_id": settings.INSTAGRAM_APP_ID,
         "redirect_uri": REDIRECT_URI,
+        #"scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",
         "scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",
         "response_type": "code",
         "state": state,
+        "display": "popup",
     }
     query = "&".join(f"{k}={v}" for k, v in params.items())
     return f"{INSTAGRAM_AUTH_URL}?{query}"
