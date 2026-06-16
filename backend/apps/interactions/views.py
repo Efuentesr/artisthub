@@ -304,4 +304,6 @@ class DebugEnvView(APIView):
             "META_APP_ID_settings": settings.META_APP_ID,
             "META_APP_ID_os": os.environ.get("META_APP_ID", "NOT FOUND"),
             "INSTAGRAM_APP_ID_os": os.environ.get("INSTAGRAM_APP_ID", "NOT FOUND"),
+            "TEST_VAR": os.environ.get("TEST_VAR", "NOT FOUND"),
+            "SECRET_KEY": os.environ.get("SECRET_KEY", "NOT FOUND"),
         })
