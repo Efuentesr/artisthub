@@ -11,6 +11,8 @@ const platformColor = {
   facebook:  "bg-blue-500/15 border-blue-500/20 text-blue-300",
 };
 
+// Se añadio que boton de sincronizar se muestre solo cuando cta este conectada
+
 export default function AccountsPage() {
   const { socialAccounts, fetchSocialAccounts } = useInteractionsStore();
   const [showAdd, setShowAdd] = useState(false);
@@ -94,28 +96,6 @@ export default function AccountsPage() {
         </div>
       )}
 
-      {/* <div className="px-4 pt-4 space-y-3">
-
-        {socialAccounts.map((acc) => (
-          <div key={acc.id} className="bg-surface-1 border border-white/8 rounded-2xl p-4 flex items-center justify-between">
-            <div>
-              <span className={`inline-flex items-center rounded-full border text-xs px-2.5 py-1 font-medium mb-1 ${platformColor[acc.platform]}`}>
-                {acc.platform_display}
-              </span>
-              <p className="text-white font-medium text-sm">{acc.handle}</p>
-            </div>
-            <button
-              onClick={() => handleDelete(acc.id)}
-              className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 active:scale-95 transition-transform"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        ))}
-      </div> */}
-
       {socialAccounts.map((acc) => (
         <div key={acc.id} className="bg-surface-1 border border-white/8 rounded-2xl p-4">
           <div className="flex items-center justify-between">
@@ -133,15 +113,9 @@ export default function AccountsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <button
-              onClick={handleConnect}
-              className="mt-2 w-full py-2 rounded-xl text-xs border border-rose-500/20 bg-rose-500/5 text-rose-400 active:scale-95 transition-all"
-            >
-              🔄 Reconectar Instagram
-            </button>
           </div>
 
-          {acc.platform === "instagram" && (
+          {acc.platform === "instagram" && acc.is_connected && (
             <button
               onClick={() => handleSync(acc.id)}
               disabled={syncing === acc.id}
@@ -149,9 +123,15 @@ export default function AccountsPage() {
             >
               {syncing === acc.id ? "Sincronizando..." : "⟳ Sincronizar DMs"}
             </button>
+          )}
 
-
-
+          {acc.platform === "instagram" && !acc.is_connected && (
+            <button
+              onClick={handleConnect}
+              className="mt-3 w-full py-2 rounded-xl text-xs border border-rose-500/30 bg-rose-500/10 text-rose-300 active:scale-95 transition-all"
+            >
+              📷 Conectar Instagram
+            </button>
           )}
 
           {syncResult && syncResult.accountId === acc.id && (
