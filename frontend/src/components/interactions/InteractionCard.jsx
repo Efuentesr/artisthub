@@ -4,12 +4,19 @@ import TagBadge from "./TagBadge";
 import NoteDrawer from "./NoteDrawer";
 
 function timeAgo(dateStr) {
-  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  const date = new Date(dateStr);
+  const diff = Math.floor((Date.now() - date) / 1000);
   if (diff < 60) return "ahora";
   if (diff < 3600) return `hace ${Math.floor(diff / 60)}m`;
   if (diff < 86400) return `hace ${Math.floor(diff / 3600)}h`;
   if (diff < 604800) return `hace ${Math.floor(diff / 86400)}d`;
-  return new Date(dateStr).toLocaleDateString("es-PE", { day: "numeric", month: "short" });
+
+  const isCurrentYear = date.getFullYear() === new Date().getFullYear();
+  return date.toLocaleDateString("es-PE", {
+    day: "numeric",
+    month: "short",
+    ...(isCurrentYear ? {} : { year: "numeric" }),
+  });
 }
 
 const typeLabel = { comment: "Comentario", dm: "Mensaje", reply: "Respuesta" };
@@ -69,6 +76,19 @@ export default function InteractionCard({ interaction, onNoteUpdate }) {
         <p className="text-sm text-white/70 leading-relaxed line-clamp-3">
           {interaction.content}
         </p>
+
+        {interaction.post_url && (
+          <a
+            href={interaction.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 mt-2 text-[11px] text-brand-400 active:opacity-70"
+          >
+            🔗 Ver publicación
+          </a>
+        )}
+
 
         {/* Footer */}
         {(note?.tag || note?.text) && (
