@@ -220,19 +220,21 @@ class InstagramSyncView(APIView):
 
 ################## EFRM ###################
 
+from .oauth import get_instagram_auth_url, exchange_code_for_token, get_long_lived_token, verify_state
+from django.shortcuts import redirect as django_redirect
+
+
 class InstagramOAuthInitView(APIView):
-    """Genera la URL de autorización y redirige al usuario a Instagram."""
+    """Genera la URL de autorización y la devuelve al frontend."""
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        state = secrets.token_urlsafe(32)
-        # Guardamos el state y el user_id en la sesión para verificarlo en el callback
-        request.session["ig_oauth_state"] = state
-        request.session["ig_oauth_user_id"] = request.user.id
-        auth_url = get_instagram_auth_url(state)
+        auth_url = get_instagram_auth_url(request.user.id)
         return Response({"auth_url": auth_url})
 
+
 class InstagramOAuthCallbackView(APIView):
+    """Recibe el código de Meta, lo intercambia por token y lo guarda."""
     permission_classes = []
 
     def get(self, request):
@@ -243,18 +245,25 @@ class InstagramOAuthCallbackView(APIView):
         FRONTEND_URL = "https://artisthub-fe-production-7a98.up.railway.app"
 
         if error or not code:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=denied")
 
+        # Verificar y decodificar el state firmado (sin depender de sesión)
+        user_id = verify_state(state)
+        if not user_id:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=invalid_state")
+
+        # 1. Intercambiar código por token corto
         token_data = exchange_code_for_token(code)
         if "error" in token_data:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=token_exchange")
 
         short_token = token_data.get("access_token")
         ig_user_id = str(token_data.get("user_id", ""))
 
+        # 2. Intercambiar por token de larga duración
         long_data = get_long_lived_token(short_token)
         if "error" in long_data:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=long_token")
 
         long_token = long_data.get("access_token")
         expires_in = long_data.get("expires_in", 5184000)
@@ -262,30 +271,23 @@ class InstagramOAuthCallbackView(APIView):
         from datetime import datetime, timezone, timedelta
         token_expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
 
-        user_id = request.session.get("ig_oauth_user_id")
-        saved_state = request.session.get("ig_oauth_state")
-
-        if not user_id or saved_state != state:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
-
+        # 3. Buscar el usuario
         from django.contrib.auth import get_user_model
         User = get_user_model()
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=user_not_found")
 
-        # Buscar la cuenta YA REGISTRADA manualmente — no crear una nueva
+        # 4. Buscar la cuenta YA REGISTRADA manualmente — no crear una nueva
         try:
             social_account = SocialAccount.objects.get(
                 artist=user,
                 platform=SocialAccount.Platform.INSTAGRAM,
             )
         except SocialAccount.DoesNotExist:
-            # No hay cuenta pre-registrada — rechazar
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=not_registered")
 
-        # Actualizar SOLO el token y el ig_user_id de la cuenta existente
         social_account.access_token = long_token
         social_account.ig_user_id = ig_user_id
         social_account.token_expires = token_expires
@@ -293,7 +295,6 @@ class InstagramOAuthCallbackView(APIView):
         social_account.save()
 
         return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")
-    
     
 # class DebugEnvView(APIView):
 #     permission_classes = []
