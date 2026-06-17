@@ -20,6 +20,11 @@ function timeAgo(dateStr) {
 }
 
 const typeLabel = { comment: "Comentario", dm: "Mensaje", reply: "Respuesta" };
+const typeColor = {
+  comment: "text-sky-400",
+  dm: "text-violet-400",
+  reply: "text-emerald-400",
+};
 
 const statusDot = {
   pendiente: "bg-amber-400",
@@ -53,7 +58,7 @@ export default function InteractionCard({ interaction, onNoteUpdate }) {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <PlatformBadge platform={interaction.platform} size="xs" />
-                <span className="text-white/30 text-[10px]">
+                <span className={`text-[10px] ${typeColor[interaction.type]}`}>
                   {typeLabel[interaction.type]}
                 </span>
               </div>
