@@ -29,5 +29,5 @@ urlpatterns = [
     path("instagram/callback/", InstagramOAuthCallbackView.as_view(), name="instagram-callback"),
 
     #temporal
-    path("debug/env/", DebugEnvView.as_view(), name="debug-env"),
+    #path("debug/env/", DebugEnvView.as_view(), name="debug-env"),
 ]

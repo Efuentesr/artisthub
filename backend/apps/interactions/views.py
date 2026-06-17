@@ -294,16 +294,16 @@ class InstagramOAuthCallbackView(APIView):
 
         return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")
     
-class DebugEnvView(APIView):
-    permission_classes = []
+# class DebugEnvView(APIView):
+#     permission_classes = []
 
-    def get(self, request):
-        import os
-        from django.conf import settings
-        return Response({
-            "META_APP_ID_settings": settings.META_APP_ID,
-            "META_APP_ID_os": os.environ.get("META_APP_ID", "NOT FOUND"),
-            "INSTAGRAM_APP_ID_os": os.environ.get("INSTAGRAM_APP_ID", "NOT FOUND"),
-            "TEST_VAR": os.environ.get("TEST_VAR", "NOT FOUND"),
-            "SECRET_KEY": os.environ.get("SECRET_KEY", "NOT FOUND"),
-        })
+#     def get(self, request):
+#         import os
+#         from django.conf import settings
+#         return Response({
+#             "META_APP_ID_settings": settings.META_APP_ID,
+#             "META_APP_ID_os": os.environ.get("META_APP_ID", "NOT FOUND"),
+#             "INSTAGRAM_APP_ID_os": os.environ.get("INSTAGRAM_APP_ID", "NOT FOUND"),
+#             "TEST_VAR": os.environ.get("TEST_VAR", "NOT FOUND"),
+#             "SECRET_KEY": os.environ.get("SECRET_KEY", "NOT FOUND"),
+#         })
