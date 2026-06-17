@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from .models import SocialAccount, Interaction, Note
-
+from django.utils import timezone
 
 class SocialAccountSerializer(serializers.ModelSerializer):
     platform_display = serializers.SerializerMethodField()
@@ -22,7 +22,11 @@ class SocialAccountSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.BooleanField())
     def get_is_connected(self, obj):
-        return bool(obj.access_token and obj.ig_user_id)
+        if not (obj.access_token and obj.ig_user_id):
+            return False
+        if obj.token_expires and obj.token_expires < timezone.now():
+            return False
+        return True
 
 
 class NoteSerializer(serializers.ModelSerializer):
