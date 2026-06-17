@@ -134,11 +134,18 @@ export default function AccountsPage() {
             </button>
           )}
 
-          {syncResult && syncResult.accountId === acc.id && (
+          {syncResult && syncResult.accountId === acc.id && !syncResult.error && (
             <p className="text-xs text-white/40 mt-2 text-center">
-              {syncResult.created} nuevos · {syncResult.skipped} ya existían
+              {syncResult.dms_created} DMs · {syncResult.comments_created} comentarios nuevos
             </p>
           )}
+          {syncResult && syncResult.accountId === acc.id && syncResult.error && (
+            <p className="text-xs text-red-400 mt-2 text-center">
+              {syncResult.error}
+            </p>
+          )}
+
+
         </div>
       ))}
 
