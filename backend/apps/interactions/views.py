@@ -14,13 +14,15 @@ from .serializers import (
 from .services import sync_instagram_dms
 
 ####
-from .oauth import get_instagram_auth_url, exchange_code_for_token, get_long_lived_token
+#from .oauth import get_instagram_auth_url, exchange_code_for_token, get_long_lived_token
 import secrets
 from django.shortcuts import redirect as django_redirect
 
 import requests
 from django.conf import settings
 from django.core import signing
+
+from .oauth import get_instagram_auth_url, verify_state, exchange_code_for_token, get_long_lived_token
 ####
 
 # ─── Social Accounts ────────────────────────────────────────────────────────
@@ -224,65 +226,73 @@ class InstagramSyncView(APIView):
 
 ################## EFRM ###################
 
+@extend_schema(
+    tags=["Interacciones"],
+    summary="Iniciar conexión OAuth con Instagram",
+    responses={200: OpenApiResponse(description="URL de autorización de Instagram.")},
+)
+class InstagramOAuthInitView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        auth_url = get_instagram_auth_url(request.user.id)
+        return Response({"auth_url": auth_url})
 
 
-INSTAGRAM_AUTH_URL = "https://api.instagram.com/oauth/authorize"
-INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token"
-INSTAGRAM_LONG_TOKEN_URL = "https://graph.instagram.com/access_token"
+class InstagramOAuthCallbackView(APIView):
+    """Recibe el código de Meta, lo intercambia por token y actualiza la cuenta pre-registrada."""
+    permission_classes = []
 
-REDIRECT_URI = "https://artisthub-production-33bd.up.railway.app/api/instagram/callback/"
+    def get(self, request):
+        code = request.GET.get("code")
+        state = request.GET.get("state")
+        error = request.GET.get("error")
 
+        FRONTEND_URL = "https://artisthub-fe-production-7a98.up.railway.app"
 
-def get_instagram_auth_url(user_id: int) -> str:
-    state = signing.dumps({"user_id": user_id}, salt="instagram-oauth")
-    params = {
-        "client_id": settings.INSTAGRAM_APP_ID,
-        "redirect_uri": REDIRECT_URI,
-        "scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",
-        "response_type": "code",
-        "state": state,
-    }
-    query = "&".join(f"{k}={v}" for k, v in params.items())
-    return f"{INSTAGRAM_AUTH_URL}?{query}"
+        if error or not code:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=denied")
 
+        user_id = verify_state(state)
+        if not user_id:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=invalid_state")
 
-def verify_state(state: str, max_age=600):
-    try:
-        data = signing.loads(state, salt="instagram-oauth", max_age=max_age)
-        return data.get("user_id")
-    except signing.BadSignature:
-        return None
+        token_data = exchange_code_for_token(code)
+        if "error" in token_data:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=token_exchange")
 
+        short_token = token_data.get("access_token")
+        ig_user_id = str(token_data.get("user_id", ""))
 
-def exchange_code_for_token(code: str) -> dict:
-    resp = requests.post(INSTAGRAM_TOKEN_URL, data={
-        "client_id": settings.INSTAGRAM_APP_ID,
-        "client_secret": settings.INSTAGRAM_APP_SECRET,
-        "grant_type": "authorization_code",
-        "redirect_uri": REDIRECT_URI,
-        "code": code,
-    })
-    if resp.status_code != 200:
-        return {"error": resp.json()}
-    return resp.json()
+        long_data = get_long_lived_token(short_token)
+        if "error" in long_data:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=long_token")
 
+        long_token = long_data.get("access_token")
+        expires_in = long_data.get("expires_in", 5184000)
 
-def get_long_lived_token(short_token: str) -> dict:
-    resp = requests.get(INSTAGRAM_LONG_TOKEN_URL, params={
-        "grant_type": "ig_exchange_token",
-        "client_secret": settings.INSTAGRAM_APP_SECRET,
-        "access_token": short_token,
-    })
-    if resp.status_code != 200:
-        return {"error": resp.json()}
-    return resp.json()
+        from datetime import datetime, timezone, timedelta
+        token_expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
 
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=user_not_found")
 
-def refresh_long_lived_token(long_token: str) -> dict:
-    resp = requests.get("https://graph.instagram.com/refresh_access_token", params={
-        "grant_type": "ig_refresh_token",
-        "access_token": long_token,
-    })
-    if resp.status_code != 200:
-        return {"error": resp.json()}
-    return resp.json()
+        try:
+            social_account = SocialAccount.objects.get(
+                artist=user,
+                platform=SocialAccount.Platform.INSTAGRAM,
+            )
+        except SocialAccount.DoesNotExist:
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=not_registered")
+
+        social_account.access_token = long_token
+        social_account.ig_user_id = ig_user_id
+        social_account.token_expires = token_expires
+        social_account.is_active = True
+        social_account.save()
+
+        return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")

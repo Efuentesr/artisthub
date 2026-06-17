@@ -2,7 +2,7 @@ import requests
 from django.conf import settings
 from django.core import signing
 
-INSTAGRAM_AUTH_URL = "https://www.facebook.com/dialog/oauth"
+INSTAGRAM_AUTH_URL = "https://api.instagram.com/oauth/authorize"
 INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token"
 INSTAGRAM_LONG_TOKEN_URL = "https://graph.instagram.com/access_token"
 
@@ -13,12 +13,11 @@ def get_instagram_auth_url(user_id: int) -> str:
     """Genera la URL de autorización de Instagram, con el user_id firmado en el state."""
     state = signing.dumps({"user_id": user_id}, salt="instagram-oauth")
     params = {
-        "client_id": settings.META_APP_ID,
+        "client_id": settings.INSTAGRAM_APP_ID,
         "redirect_uri": REDIRECT_URI,
-        "scope": "instagram_basic,instagram_manage_messages,pages_show_list,pages_read_engagement,business_management",
+        "scope": "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments",
         "response_type": "code",
         "state": state,
-        "display": "popup",
     }
     query = "&".join(f"{k}={v}" for k, v in params.items())
     return f"{INSTAGRAM_AUTH_URL}?{query}"
