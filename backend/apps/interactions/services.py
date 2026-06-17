@@ -62,3 +62,73 @@ def sync_instagram_dms(social_account: SocialAccount) -> dict:
             created += 1
 
     return {"created": created, "skipped": skipped, "conversations": len(conversations)}
+
+def sync_instagram_comments(social_account: SocialAccount) -> dict:
+    """
+    Consulta las publicaciones recientes y sus comentarios, guardándolos como Interaction.
+    """
+    token = social_account.access_token
+    ig_user_id = social_account.ig_user_id
+
+    if not token or not ig_user_id:
+        return {"error": "Cuenta sin token o ig_user_id configurado"}
+
+    # 1. Obtener publicaciones recientes (últimas 25)
+    resp = requests.get(
+        f"{GRAPH_URL}/{ig_user_id}/media",
+        params={
+            "fields": "id,permalink,caption,timestamp",
+            "limit": 25,
+            "access_token": token,
+        },
+    )
+
+    if resp.status_code != 200:
+        return {"error": resp.json().get("error", {}).get("message", "Error al obtener publicaciones")}
+
+    media_items = resp.json().get("data", [])
+    created = 0
+    skipped = 0
+
+    for media in media_items:
+        media_id = media.get("id")
+        permalink = media.get("permalink", "")
+
+        comments_resp = requests.get(
+            f"{GRAPH_URL}/{media_id}/comments",
+            params={
+                "fields": "id,text,username,timestamp",
+                "access_token": token,
+            },
+        )
+
+        if comments_resp.status_code != 200:
+            continue
+
+        comments = comments_resp.json().get("data", [])
+
+        for comment in comments:
+            platform_id = comment.get("id")
+            if not platform_id:
+                continue
+
+            if Interaction.objects.filter(platform_id=platform_id).exists():
+                skipped += 1
+                continue
+
+            received_at = datetime.fromisoformat(
+                comment["timestamp"].replace("Z", "+00:00")
+            ) if comment.get("timestamp") else datetime.now(timezone.utc)
+
+            Interaction.objects.create(
+                social_account=social_account,
+                platform_id=platform_id,
+                type=Interaction.InteractionType.COMMENT,
+                from_username=comment.get("username", "unknown"),
+                content=comment.get("text", ""),
+                post_url=permalink,
+                received_at=received_at,
+            )
+            created += 1
+
+    return {"created": created, "skipped": skipped, "media_checked": len(media_items)}

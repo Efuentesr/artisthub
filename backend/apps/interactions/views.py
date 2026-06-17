@@ -11,10 +11,8 @@ from .serializers import (
     InteractionCreateSerializer,
     NoteSerializer,
 )
-from .services import sync_instagram_dms
 
 ####
-#from .oauth import get_instagram_auth_url, exchange_code_for_token, get_long_lived_token
 import secrets
 from django.shortcuts import redirect as django_redirect
 
@@ -24,6 +22,8 @@ from django.core import signing
 
 from .oauth import get_instagram_auth_url, verify_state, exchange_code_for_token, get_long_lived_token
 ####
+
+from .services import sync_instagram_dms, sync_instagram_comments
 
 # ─── Social Accounts ────────────────────────────────────────────────────────
 
@@ -216,13 +216,24 @@ class InstagramSyncView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        result = sync_instagram_dms(social_account)
+        dm_result = sync_instagram_dms(social_account)
+        if "error" in dm_result:
+            return Response({"detail": dm_result["error"]}, status=status.HTTP_400_BAD_REQUEST)
 
-        if "error" in result:
-            return Response({"detail": result["error"]}, status=status.HTTP_400_BAD_REQUEST)
+        comments_result = sync_instagram_comments(social_account)
+        if "error" in comments_result:
+            # No bloqueamos por error en comentarios, solo lo reportamos
+            comments_result = {"created": 0, "skipped": 0, "media_checked": 0, "error": comments_result["error"]}
 
-        return Response(result, status=status.HTTP_200_OK)
-    
+        return Response({
+            "dms_created": dm_result.get("created", 0),
+            "dms_skipped": dm_result.get("skipped", 0),
+            "conversations": dm_result.get("conversations", 0),
+            "comments_created": comments_result.get("created", 0),
+            "comments_skipped": comments_result.get("skipped", 0),
+            "media_checked": comments_result.get("media_checked", 0),
+        }, status=status.HTTP_200_OK)
+   
 
 ################## EFRM ###################
 
