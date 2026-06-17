@@ -8,7 +8,6 @@ from .views import (
     InstagramSyncView,
     InstagramOAuthInitView,
     InstagramOAuthCallbackView,
-    DebugEnvView,
 )
 
 urlpatterns = [
