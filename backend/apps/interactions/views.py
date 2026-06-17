@@ -232,10 +232,8 @@ class InstagramOAuthInitView(APIView):
         auth_url = get_instagram_auth_url(state)
         return Response({"auth_url": auth_url})
 
-
 class InstagramOAuthCallbackView(APIView):
-    """Recibe el código de Meta, lo intercambia por token y lo guarda."""
-    permission_classes = []  # Público — Meta redirige aquí sin JWT
+    permission_classes = []
 
     def get(self, request):
         code = request.GET.get("code")
@@ -247,7 +245,6 @@ class InstagramOAuthCallbackView(APIView):
         if error or not code:
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
 
-        # 1. Intercambiar código por token corto
         token_data = exchange_code_for_token(code)
         if "error" in token_data:
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
@@ -255,25 +252,22 @@ class InstagramOAuthCallbackView(APIView):
         short_token = token_data.get("access_token")
         ig_user_id = str(token_data.get("user_id", ""))
 
-        # 2. Intercambiar por token de larga duración
         long_data = get_long_lived_token(short_token)
         if "error" in long_data:
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
 
         long_token = long_data.get("access_token")
-        expires_in = long_data.get("expires_in", 5184000)  # ~60 días
+        expires_in = long_data.get("expires_in", 5184000)
 
         from datetime import datetime, timezone, timedelta
         token_expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
 
-        # 3. Buscar el user_id guardado en sesión
         user_id = request.session.get("ig_oauth_user_id")
         saved_state = request.session.get("ig_oauth_state")
 
         if not user_id or saved_state != state:
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
 
-        # 4. Actualizar o crear el SocialAccount
         from django.contrib.auth import get_user_model
         User = get_user_model()
         try:
@@ -281,18 +275,25 @@ class InstagramOAuthCallbackView(APIView):
         except User.DoesNotExist:
             return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=1")
 
-        SocialAccount.objects.update_or_create(
-            artist=user,
-            platform=SocialAccount.Platform.INSTAGRAM,
-            defaults={
-                "access_token": long_token,
-                "ig_user_id": ig_user_id,
-                "token_expires": token_expires,
-                "is_active": True,
-            }
-        )
+        # Buscar la cuenta YA REGISTRADA manualmente — no crear una nueva
+        try:
+            social_account = SocialAccount.objects.get(
+                artist=user,
+                platform=SocialAccount.Platform.INSTAGRAM,
+            )
+        except SocialAccount.DoesNotExist:
+            # No hay cuenta pre-registrada — rechazar
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=not_registered")
+
+        # Actualizar SOLO el token y el ig_user_id de la cuenta existente
+        social_account.access_token = long_token
+        social_account.ig_user_id = ig_user_id
+        social_account.token_expires = token_expires
+        social_account.is_active = True
+        social_account.save()
 
         return django_redirect(f"{FRONTEND_URL}/accounts?ig_connected=1")
+    
     
 # class DebugEnvView(APIView):
 #     permission_classes = []
