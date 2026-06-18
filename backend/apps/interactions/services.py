@@ -22,7 +22,7 @@ def sync_instagram_dms(social_account: SocialAccount) -> dict:
         f"{GRAPH_URL}/{ig_user_id}/conversations",
         params={
             "platform": "instagram",
-            "fields": "id,messages{id,message,from,created_time}",
+            "fields": "id,messages{id,message,from,created_time,shares,attachments}",
             "access_token": token,
         },
     )
@@ -51,17 +51,34 @@ def sync_instagram_dms(social_account: SocialAccount) -> dict:
                 msg["created_time"].replace("Z", "+00:00")
             ) if msg.get("created_time") else datetime.now(timezone.utc)
 
+            content = msg.get("message", "")
+            post_url = ""
+
+            # Si no hay texto, puede ser un post/reel compartido
+            if not content:
+                shares = msg.get("shares", {}).get("data", [])
+                if shares:
+                    post_url = shares[0].get("link", "")
+                    content = "📎 Publicación compartida"
+                else:
+                    attachments = msg.get("attachments", {}).get("data", [])
+                    if attachments:
+                        att_type = attachments[0].get("type", "archivo")
+                        content = f"📎 {att_type.capitalize()} adjunto"
+
             Interaction.objects.create(
                 social_account=social_account,
                 platform_id=platform_id,
                 type=Interaction.InteractionType.DM,
                 from_username=from_user.get("username", from_user.get("name", "unknown")),
-                content=msg.get("message", ""),
+                content=content,
+                post_url=post_url,
                 received_at=received_at,
             )
             created += 1
 
     return {"created": created, "skipped": skipped, "conversations": len(conversations)}
+
 
 def sync_instagram_comments(social_account: SocialAccount) -> dict:
     """
