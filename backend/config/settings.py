@@ -158,3 +158,5 @@ INSTAGRAM_APP_SECRET = env("INSTAGRAM_APP_SECRET", default="")
 
 META_APP_ID = env("META_APP_ID", default="")
 META_APP_SECRET = env("META_APP_SECRET", default="")
+
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
