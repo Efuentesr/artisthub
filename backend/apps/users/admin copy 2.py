@@ -1,14 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
-from apps.interactions.models import SocialAccount
-
-
-class SocialAccountInline(admin.TabularInline):
-    model = SocialAccount
-    extra = 1
-    fields = ["platform", "handle", "ig_user_id", "is_active"]
-    readonly_fields = ["ig_user_id"]
 
 
 @admin.register(User)
@@ -17,7 +9,6 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ["is_active", "email_verified", "is_staff"]
     search_fields = ["email", "artistic_name"]
     ordering = ["-created_at"]
-    inlines = [SocialAccountInline]
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -33,4 +24,3 @@ class UserAdmin(BaseUserAdmin):
             "fields": ("email", "artistic_name", "password1", "password2", "is_active"),
         }),
     )
-    
