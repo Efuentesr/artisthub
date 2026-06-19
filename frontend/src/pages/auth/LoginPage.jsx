@@ -63,6 +63,7 @@ export default function LoginPage() {
           required
         />
 
+        <div>
         <Input
           label="Contraseña"
           name="password"
@@ -74,7 +75,7 @@ export default function LoginPage() {
           autoComplete="current-password"
           required
         />
-        <div>
+        
         <button
           type="button"
           onClick={() => setShowPassword((v) => !v)}
