@@ -82,7 +82,7 @@ export default function LoginPage() {
             className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           >
-            <EyeIcon open={showPassword} />
+            <EyeIcon open={showPassword} /> xxx
           </button>
         </div>
         <Button type="submit" isLoading={isLoading} className="w-full mt-2">
