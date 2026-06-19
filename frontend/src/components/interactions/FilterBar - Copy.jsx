@@ -7,13 +7,6 @@ const PLATFORMS = [
   { value: "facebook", label: "Facebook" },
 ];
 
-const TYPES = [
-  { value: "", label: "Todos" },
-  { value: "dm", label: "Mensaje" },
-  { value: "comment", label: "Comentario" },
-  { value: "reply", label: "Respuesta" },
-];
-
 const TAGS = [
   { value: "", label: "Todo" },
   { value: "sugerencia", label: "Sugerencia" },
@@ -74,23 +67,6 @@ export default function FilterBar() {
             }`}
           >
             {p.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tipo de interacción */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {TYPES.map((t) => (
-          <button
-            key={t.value}
-            onClick={() => apply("type", t.value)}
-            className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs border transition-all ${
-              filters.type === t.value
-                ? "bg-brand-500/20 border-brand-400/40 text-brand-300"
-                : "border-white/10 text-white/40 hover:text-white/60"
-            }`}
-          >
-            {t.label}
           </button>
         ))}
       </div>
