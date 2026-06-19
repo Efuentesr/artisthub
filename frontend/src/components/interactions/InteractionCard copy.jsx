@@ -19,19 +19,6 @@ function timeAgo(dateStr) {
   });
 }
 
-function exactDateTime(dateStr) {
-  const date = new Date(dateStr);
-  const datePart = date.toLocaleDateString("es-PE", {
-    day: "numeric",
-    month: "short",
-  });
-  const timePart = date.toLocaleTimeString("es-PE", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${datePart}, ${timePart}`;
-}
-
 const typeLabel = { comment: "Comentario", dm: "Mensaje", reply: "Respuesta" };
 const typeColor = {
   comment: "text-sky-400",
@@ -79,7 +66,7 @@ export default function InteractionCard({ interaction, onNoteUpdate }) {
           </div>
           <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
             <span className="text-white/30 text-[11px]">
-              {timeAgo(interaction.received_at)} · {exactDateTime(interaction.received_at)}
+              {timeAgo(interaction.received_at)}
             </span>
             {note?.status && (
               <div className="flex items-center gap-1">

@@ -65,11 +65,6 @@ def sync_instagram_dms(social_account: SocialAccount) -> dict:
                     if attachments:
                         att_type = attachments[0].get("type", "archivo")
                         content = f"📎 {att_type.capitalize()} adjunto"
-                    else:
-                        # Caso conocido: Instagram comparte un post/reel propio en el DM,
-                        # pero Graph API no expone ese contenido a apps de terceros
-                        # (limitación documentada de Meta, no un bug de nuestro código).
-                        content = "📷 Contenido compartido (no visible vía API — revisar en Instagram)"
 
             Interaction.objects.create(
                 social_account=social_account,
