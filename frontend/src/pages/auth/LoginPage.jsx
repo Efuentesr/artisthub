@@ -74,12 +74,13 @@ export default function LoginPage() {
             onChange={handleChange}
             autoComplete="current-password"
             required
+            className="w-3/4"
           />
           
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className=" px-3 items-end text-gray-400 hover:text-gray-600"
+            className="items-end text-gray-400 hover:text-gray-600"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           >
             <EyeIcon open={showPassword} />
