@@ -66,7 +66,8 @@ export default function LoginPage() {
         <Input
           label="Contraseña"
           name="password"
-          type="password"
+          // type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="••••••••"
           value={form.password}
           onChange={handleChange}
