@@ -63,31 +63,31 @@ export default function LoginPage() {
           required
         />
 
-        <div>
-        <Input
-          label="Contraseña:"
-          name="password"
-          // type="password"
-          type={showPassword ? 'text' : 'password'}
-          placeholder="••••••••"
-          value={form.password}
-          onChange={handleChange}
-          autoComplete="current-password"
-          required
-        />
-        
-        <button
-          type="button"
-          onClick={() => setShowPassword((v) => !v)}
-          className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
-          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-        >
-          <EyeIcon open={showPassword} />
-        </button>
+        <div className="flex">
+          <Input
+            label="Contraseña"
+            name="password"
+            // type="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+            required
+          />
+          
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          >
+            <EyeIcon open={showPassword} />
+          </button>
 
-        <Button type="submit" isLoading={isLoading} className="w-full mt-2">
-          Iniciar sesión
-        </Button>
+          <Button type="submit" isLoading={isLoading} className="w-full mt-2">
+            Iniciar sesión
+          </Button>
         </div>
       </form>
 
