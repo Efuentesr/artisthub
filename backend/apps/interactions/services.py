@@ -114,7 +114,7 @@ def sync_instagram_comments(social_account: SocialAccount) -> dict:
         comments_resp = requests.get(
             f"{GRAPH_URL}/{media_id}/comments",
             params={
-                "fields": "id,text,username,timestamp",
+                "fields": "id,text,username,timestamp, from",
                 "access_token": token,
             },
         )
@@ -137,15 +137,19 @@ def sync_instagram_comments(social_account: SocialAccount) -> dict:
                 comment["timestamp"].replace("Z", "+00:00")
             ) if comment.get("timestamp") else datetime.now(timezone.utc)
 
+            from_obj = comment.get("from", {}) or {}
+            username = comment.get("username") or from_obj.get("username") or "unknown"
+
             Interaction.objects.create(
                 social_account=social_account,
                 platform_id=platform_id,
                 type=Interaction.InteractionType.COMMENT,
-                from_username=comment.get("username", "unknown"),
+                from_username=username,
                 content=comment.get("text", ""),
                 post_url=permalink,
                 received_at=received_at,
             )
+            
             created += 1
 
     return {"created": created, "skipped": skipped, "media_checked": len(media_items)}
