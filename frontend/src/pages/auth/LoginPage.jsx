@@ -74,7 +74,7 @@ export default function LoginPage() {
           autoComplete="current-password"
           required
         />
-
+        <div>
         <button
           type="button"
           onClick={() => setShowPassword((v) => !v)}
@@ -87,6 +87,7 @@ export default function LoginPage() {
         <Button type="submit" isLoading={isLoading} className="w-full mt-2">
           Iniciar sesión
         </Button>
+        </div>
       </form>
 
       <p className="mt-6 text-center text-sm text-white/40">
