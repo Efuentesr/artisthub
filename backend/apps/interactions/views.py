@@ -275,9 +275,15 @@ class InstagramOAuthCallbackView(APIView):
         short_token = token_data.get("access_token")
         ig_user_id = str(token_data.get("user_id", ""))
 
+        # long_data = get_long_lived_token(short_token)
+        # if "error" in long_data:
+        #     return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=long_token")
+
         long_data = get_long_lived_token(short_token)
         if "error" in long_data:
-            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=long_token")
+            import urllib.parse
+            error_detail = urllib.parse.quote(str(long_data.get("error", "")))
+            return django_redirect(f"{FRONTEND_URL}/accounts?ig_error=long_token&detail={error_detail}")
 
         long_token = long_data.get("access_token")
         expires_in = long_data.get("expires_in", 5184000)
