@@ -63,7 +63,7 @@ export default function LoginPage() {
           required
         />
 
-        <div className="flex">
+        <div className="flex flex-row justify-between">
           <Input
             label="Contraseña"
             name="password"
@@ -82,7 +82,7 @@ export default function LoginPage() {
             className=" px-3 items-center text-gray-400 hover:text-gray-600"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           >
-            <EyeIcon open={showPassword} /> xxx
+            <EyeIcon open={showPassword} />
           </button>
         </div>
         <Button type="submit" isLoading={isLoading} className="w-full mt-2">
