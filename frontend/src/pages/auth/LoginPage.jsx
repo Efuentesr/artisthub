@@ -10,6 +10,8 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading, error, clearError } = useAuthStore();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false)
+
 
   const handleChange = (e) => {
     clearError();
@@ -57,6 +59,15 @@ export default function LoginPage() {
           autoComplete="current-password"
           required
         />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword((v) => !v)}
+          className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        >
+          <EyeIcon open={showPassword} />
+        </button>
 
         <Button type="submit" isLoading={isLoading} className="w-full mt-2">
           Iniciar sesión
