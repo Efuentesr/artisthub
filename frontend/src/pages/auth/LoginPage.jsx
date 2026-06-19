@@ -84,11 +84,11 @@ export default function LoginPage() {
           >
             <EyeIcon open={showPassword} />
           </button>
-
-          <Button type="submit" isLoading={isLoading} className="w-full mt-2">
-            Iniciar sesión
-          </Button>
         </div>
+        <Button type="submit" isLoading={isLoading} className="w-full mt-2">
+          Iniciar sesión
+        </Button>
+
       </form>
 
       <p className="mt-6 text-center text-sm text-white/40">
