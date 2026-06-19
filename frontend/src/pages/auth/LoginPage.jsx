@@ -65,7 +65,7 @@ export default function LoginPage() {
 
         <div>
         <Input
-          label="Contraseña"
+          label="Contraseña:"
           name="password"
           // type="password"
           type={showPassword ? 'text' : 'password'}
