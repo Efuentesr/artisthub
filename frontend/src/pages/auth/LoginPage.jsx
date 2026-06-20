@@ -63,7 +63,7 @@ export default function LoginPage() {
           required
         />
 
-        <div>
+        <div className="flex flex-row">
           <Input
             className="w-full"
             label="Contraseña"
