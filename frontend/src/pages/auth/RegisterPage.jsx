@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
 import AuthLayout from "./AuthLayout";
 import Input from "../../components/ui/Input";
+import PasswordInput from "../../components/ui/PasswordInput";
 import Button from "../../components/ui/Button";
 import Alert from "../../components/ui/Alert";
 
@@ -100,25 +101,25 @@ export default function RegisterPage() {
           error={fieldErrors.genre}
         />
 
-        <Input
+        <PasswordInput
           label="Contraseña"
           name="password"
-          type="password"
           placeholder="Mínimo 8 caracteres"
           value={form.password}
           onChange={handleChange}
           error={fieldErrors.password?.[0]}
+          autoComplete="new-password"
           required
         />
 
-        <Input
+        <PasswordInput
           label="Confirmar contraseña"
           name="password2"
-          type="password"
           placeholder="Repite tu contraseña"
           value={form.password2}
           onChange={handleChange}
           error={fieldErrors.password2}
+          autoComplete="new-password"
           required
         />
 
