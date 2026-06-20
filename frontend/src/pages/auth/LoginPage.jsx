@@ -63,12 +63,11 @@ export default function LoginPage() {
           required
         />
 
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row">
           <Input
             className="w-full"
             label="Contraseña"
             name="password"
-            // type="password"
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             value={form.password}
