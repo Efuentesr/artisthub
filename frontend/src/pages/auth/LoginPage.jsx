@@ -65,6 +65,7 @@ export default function LoginPage() {
 
         <div className="flex flex-row justify-between">
           <Input
+            className="w-full"
             label="Contraseña"
             name="password"
             // type="password"
@@ -74,7 +75,6 @@ export default function LoginPage() {
             onChange={handleChange}
             autoComplete="current-password"
             required
-            className="w-3/4"
           />
           
           <button
